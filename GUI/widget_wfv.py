@@ -160,9 +160,6 @@ class Ui_WaveformViewer(object):
         self.pushButton_export = QtWidgets.QPushButton(WaveformViewer)
         self.pushButton_export.setObjectName("pushButton_export")
         self.horizontalLayout.addWidget(self.pushButton_export)
-        self.comboBox_varlist = QtWidgets.QComboBox(WaveformViewer)
-        self.comboBox_varlist.setObjectName("comboBox_varlist")
-        self.horizontalLayout.addWidget(self.comboBox_varlist)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
         self.gridLayout.setRowStretch(0, 4)
 

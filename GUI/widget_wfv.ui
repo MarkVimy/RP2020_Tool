@@ -359,9 +359,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_varlist"/>
-     </item>
     </layout>
    </item>
   </layout>

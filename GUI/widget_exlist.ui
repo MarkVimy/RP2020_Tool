@@ -10,8 +10,8 @@
     <height>374</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
+  <property name="toolTip">
+   <string>双击单个数据可实现左移或者右移</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">

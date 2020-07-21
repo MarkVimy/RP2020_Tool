@@ -1,9 +1,9 @@
 from GUI.widget_exlist import Ui_ExList
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QWidget, QApplication, QListView, \
-                            QAbstractItemView, QMessageBox
-from XLSX.myxlsx import MyWorkBook
-from SERIAL.mywfv import Frame, WaveformTimer
+from PyQt5.QtWidgets import QWidget, QApplication, QAbstractItemView, QMessageBox
+from APP.myxlsx import MyWorkBook
+from APP.mywfv import Frame, WaveformTimer
 
 
 class ExList(QWidget, Ui_ExList):
@@ -35,6 +35,8 @@ class ExList(QWidget, Ui_ExList):
 
     def init_ui(self):
         self.setupUi(self)
+        self.setWindowTitle('导出工具')
+        self.setWindowIcon(QIcon('../GUI/RpLogo.jpg'))
 
     def init_action(self):
         self.listView_left_1.doubleClicked.connect(lambda: self.transfer(self.listView_left_1))
@@ -75,9 +77,36 @@ class ExList(QWidget, Ui_ExList):
         listview_model.removeRows(0, listview_model.rowCount())
 
     def export(self, *args):
+        # 有效帧数
+        frame_num = 0
+        # 获取右边的全部listview
+        right_listviews = self.get_listviews()[1::2]
+        # xlsx工作簿
         wb = MyWorkBook()
-        # wb.export(self.timer2.time[1:], self.frame2.shoot_pwm.dat[1:], self.frame2.shoot_speed.dat[1:], headings=['时间', 'PWM', '射速'])
-        QMessageBox.information(self, '射速测试', '导出成功!', QMessageBox.Yes)
+
+        # 工作簿初始化
+        wb.export_start()
+        # 导出所有选中的数据
+        for i, listview in enumerate(right_listviews):
+            listview_model = listview.model()
+            # 每次重新清空(防止第2次进入的时候仍保留上一帧数据)
+            curves = []
+            # 如果右列表非空
+            if listview_model.rowCount():
+                frame_num += 1
+                # 完成一帧的遍历
+                for j in range(listview_model.rowCount()):
+                    # 从0开始遍历
+                    listview.setCurrentIndex(listview_model.index(j))
+                    # 找到帧[i]中对应的curve_name的位置
+                    k = [curve.name for curve in self.frames[i].get_curves()].index(listview.currentIndex().data())
+                    curve = self.frames[i].get_curves()[k]
+                    curves.append(curve)
+                # 创建一页Sheet并将数据填入其中
+                wb.export_add_sheet(self.timers[i].time[1:], *[curve.dat[1:] for curve in curves], headings=['时间'] + [curve.name for curve in curves], sheet_name='Frame %d' % (i+1))
+        # 保存wb并给出提示信息
+        wb.export_end()
+        QMessageBox.information(self, '导出数据', '导出成功! 共 %d 帧'%frame_num, QMessageBox.Yes)
 
     def traversal(self, listview, data):
         listmodel = listview.model()

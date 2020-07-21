@@ -9,8 +9,8 @@ import pyqtgraph as pg
 import numpy as np
 import math
 import time
-from SERIAL.myserial import Fn_BYTES
-# from SERIAL.myexlist import ExList
+from APP.myserial import Fn_BYTES
+# from APP.myexlist import ExList
 
 
 class Curve(object):
@@ -246,7 +246,6 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
         self.init_ui(widget)
         self.init_params()
         self.init_tableWidget()
-        self.init_comboBox()
         self.init_legend()
         self.init_action()
 
@@ -327,12 +326,6 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
                 # y轴缩放值(允许编辑)
                 table_widget.setItem(row, 7, QTableWidgetItem(str(curve.y_scale)))
                 table_widget.item(row, 7).setTextAlignment(int(Qt.AlignHCenter | Qt.AlignVCenter))
-
-    def init_comboBox(self):
-        # 导出列表
-        self.comboBox_varlist.addItems([self.tableWidget.cellWidget(n, 0).text() for n in range(self.frame1.param_cnt)])
-        self.comboBox_varlist.addItems([self.tableWidget_2.cellWidget(n, 0).text() for n in range(self.frame2.param_cnt)])
-        self.comboBox_varlist.addItem('全部')
 
     def init_legend(self):
         for frame in self.get_frames()[1:]:
@@ -473,17 +466,6 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
 
     def export_data(self):
         self.export_emit()
-
-        # index = self.comboBox_varlist.currentIndex()
-        # curves_list = self.frame1.get_curves() + self.frame2.get_curves()
-        # wb = MyWorkBook()
-        # try:
-        #     curve = curves_list[index]
-        #     print(curve.name)
-        #     wb.export(self.cur_timer.time[1:], curve.dat[1:], headings=['时间', curve.name])
-        #     QMessageBox.information(self, curve.name, '导出成功!', QMessageBox.Yes)
-        # except IndexError:
-        #     print("All")
 
     def get_color(self, index):
         # https://blog.csdn.net/weixin_43717845/article/details/104246426

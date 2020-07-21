@@ -144,7 +144,7 @@ class Ui_ExList(object):
 
     def retranslateUi(self, ExList):
         _translate = QtCore.QCoreApplication.translate
-        ExList.setWindowTitle(_translate("ExList", "Form"))
+        ExList.setToolTip(_translate("ExList", "双击单个数据可实现左移或者右移"))
         self.label_1.setText(_translate("ExList", "全部项目"))
         self.tabWidget_left.setTabText(self.tabWidget_left.indexOf(self.tab), _translate("ExList", "Frame 1"))
         self.tabWidget_left.setTabText(self.tabWidget_left.indexOf(self.tab_2), _translate("ExList", "Frame 2"))

@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow,\
                             QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSignal
-from SERIAL.myserial import SerialDebugger
-from SERIAL.mywfv import WaveformViewer
-from SERIAL.myexlist import ExList
+from APP.myserial import SerialDebugger
+from APP.mywfv import WaveformViewer
+from APP.myexlist import ExList
 from GUI.myui_serial import Ui_MainWindow
 
 
