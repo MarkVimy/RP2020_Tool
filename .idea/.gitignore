@@ -1,7 +1,7 @@
 # Default ignored files
 /workspace.xml
 # 忽略打包文件
-../dist
-../build
+../dist/
+../build/
 # 忽略所有的 测试数据 文件
-../TEST/
+../TEST/*.xlsx
