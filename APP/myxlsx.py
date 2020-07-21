@@ -24,12 +24,12 @@ class MyWorkBook(xlwt.Workbook):
         # 保存excel文件
         wb.close()
 
-    def export_start(self):
+    def export_start(self, fp):
         # 用时间戳来命名文件
         t = '-'.join(map(str, time.localtime()[:6]))
         filename = t + '.xlsx'
         # 新建excel表
-        self.workbook = xlwt.Workbook(filename)
+        self.workbook = xlwt.Workbook(fp + filename)
 
     def export_add_sheet(self, *args, headings=['时间', '数值'], sheet_name=None):
         if len(args) != len(headings):
@@ -37,6 +37,9 @@ class MyWorkBook(xlwt.Workbook):
             return
         ws = self.workbook.add_worksheet(sheet_name)
         col_num = len(headings)
+        ws.set_column(0, col_num, 15)
+        cell_format = self.workbook.add_format({'bold': True})
+        ws.set_row(0, 15, cell_format)
         # 写入表头
         ws.write_row(0, 0, headings)
         # 写入数据

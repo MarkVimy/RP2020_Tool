@@ -84,8 +84,8 @@ class ExList(QWidget, Ui_ExList):
         # xlsx工作簿
         wb = MyWorkBook()
 
-        # 工作簿初始化
-        wb.export_start()
+        # 工作簿初始化(保存在TEST文件夹下)
+        wb.export_start('../TEST/')
         # 导出所有选中的数据
         for i, listview in enumerate(right_listviews):
             listview_model = listview.model()
