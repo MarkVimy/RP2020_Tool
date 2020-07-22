@@ -48,7 +48,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- 主界面：&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1.左侧为工具栏。单击可跳转至对应工具所在的页，双击可以弹出独立窗口（也可以在菜单栏中选择弹出某一工具的独立窗口）&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- 示波器：&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1.根据数据帧显示数值部分&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;1.根据数据帧显示数值部分&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;关于我们：&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;深圳大学RobotPiolts战队&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -90,6 +93,8 @@ p, li { white-space: pre-wrap; }
    <addaction name="actionSerialDebugger"/>
    <addaction name="separator"/>
    <addaction name="actionWaveformViewer"/>
+   <addaction name="separator"/>
+   <addaction name="actionUserManual"/>
   </widget>
   <action name="actionSerialDebugger">
    <property name="text">
@@ -123,6 +128,14 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>打开示波器独立窗口</string>
+   </property>
+  </action>
+  <action name="actionUserManual">
+   <property name="text">
+    <string>使用说明</string>
+   </property>
+   <property name="toolTip">
+    <string>关于上位机的使用说明</string>
    </property>
   </action>
  </widget>

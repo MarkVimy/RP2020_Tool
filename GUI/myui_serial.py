@@ -53,12 +53,16 @@ class Ui_MainWindow(object):
         self.actionSerialDebugger_2.setObjectName("actionSerialDebugger_2")
         self.actionWaveformViewer_2 = QtWidgets.QAction(MainWindow)
         self.actionWaveformViewer_2.setObjectName("actionWaveformViewer_2")
+        self.actionUserManual = QtWidgets.QAction(MainWindow)
+        self.actionUserManual.setObjectName("actionUserManual")
         self.menu.addAction(self.actionSerialDebugger_2)
         self.menu.addAction(self.actionWaveformViewer_2)
         self.menubar.addAction(self.menu.menuAction())
         self.toolBar.addAction(self.actionSerialDebugger)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionWaveformViewer)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionUserManual)
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -78,7 +82,10 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- 主界面：</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.左侧为工具栏。单击可跳转至对应工具所在的页，双击可以弹出独立窗口（也可以在菜单栏中选择弹出某一工具的独立窗口）</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- 示波器：</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.根据数据帧显示数值部分</p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">1.根据数据帧显示数值部分</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">关于我们：</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">深圳大学RobotPiolts战队</p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "使用说明"))
         self.menu.setTitle(_translate("MainWindow", "独立窗口(&F)"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
@@ -92,6 +99,8 @@ class Ui_MainWindow(object):
         self.actionSerialDebugger_2.setToolTip(_translate("MainWindow", "打开串口调试助手独立窗口"))
         self.actionWaveformViewer_2.setText(_translate("MainWindow", "示波器(&W)"))
         self.actionWaveformViewer_2.setToolTip(_translate("MainWindow", "打开示波器独立窗口"))
+        self.actionUserManual.setText(_translate("MainWindow", "使用说明"))
+        self.actionUserManual.setToolTip(_translate("MainWindow", "关于上位机的使用说明"))
 
 
 if __name__ == "__main__":

@@ -309,13 +309,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox_freeze_serialdebugger">
-       <property name="text">
-        <string>冻结调试助手</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QCheckBox" name="checkBox_legend">
        <property name="text">
         <string>显示图例</string>

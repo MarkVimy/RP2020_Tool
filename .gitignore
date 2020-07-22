@@ -1,0 +1,6 @@
+# 忽略打包文件
+main.spec
+dist
+build/main/
+# 忽略所有的 测试数据 文件
+TEST/*.xlsx

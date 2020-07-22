@@ -10,7 +10,6 @@ import numpy as np
 import math
 import time
 from APP.myserial import Fn_BYTES
-# from APP.myexlist import ExList
 
 
 class Curve(object):
@@ -37,7 +36,10 @@ class Curve(object):
         self.name_box.setChecked(True)
 
     def get_avr(self):
-        return self.dat_sum/self.dat_cnt
+        # 首位填充的0不计入其中
+        if self.dat_cnt == 1:
+            return 0
+        return (self.dat_sum-0)/(self.dat_cnt-1)
 
     def get_colorBlock(self):
         return self.color_block
@@ -82,7 +84,7 @@ class Curve(object):
             #     self.curve.setData(time, [dat/self.y_scale+self.y_offset for dat in self.dat])
             # 增加这项功能会使得界面比较卡3/
             # now_time = time.time()
-            if self.y_scale:
+            if self.y_scale != 1:
                 self.curve.setData(t, [dat*self.y_scale+self.y_offset for dat in self.dat[-num:]])
             else:
                 self.curve.setData(t, [dat+self.y_offset for dat in self.dat[-num:]])
@@ -174,18 +176,23 @@ class Frame2(Frame):
     def __init__(self, plot_widget):
         super(Frame2, self).__init__()
         self.func_byte = Fn_BYTES[1]
-        self.shoot_pwm = Curve(plot_widget, color='ff8040', name='shoot_pwm')
-        # self.shoot_pwm.name_box.setChecked(False)
-        self.shoot_speed = Curve(plot_widget, color='#8080ff', name='shoot_speed')
-        # self.shoot_speed.name_box.setChecked(False)
-        self.shoot_heat = Curve(plot_widget, color='ff8080', name='shoot_heat')
+
+        self.shoot_freq = Curve(plot_widget, color='ff8040', name='shoot_freq')
+        self.shoot_ping = Curve(plot_widget, color='ff8080', name='shoot_ping')
+        self.shoot_heat = Curve(plot_widget, color='80ff80', name='shoot_heat')
+        self.shoot_pwm = Curve(plot_widget, color='#8080ff', name='shoot_pwm')
+        self.shoot_speed = Curve(plot_widget, color='4080ff', name='shoot_speed')
+
+        self.shoot_freq.name_box.setChecked(False)
+        self.shoot_ping.name_box.setChecked(False)
         self.shoot_heat.name_box.setChecked(False)
-        self.power = Curve(plot_widget, color='80ff80', name='power')
-        self.power.name_box.setChecked(False)
-        self.param_cnt = 4
+        self.shoot_pwm.name_box.setChecked(False)
+        self.shoot_speed.name_box.setChecked(False)
+
+        self.param_cnt = 5
 
     def get_curves(self):
-        return [self.shoot_pwm, self.shoot_speed, self.shoot_heat, self.power]
+        return [self.shoot_freq, self.shoot_ping, self.shoot_heat, self.shoot_pwm, self.shoot_speed]
 
 
 class WaveformTimer(QTimer):
@@ -266,7 +273,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
         self.cur_frame = self.frame1
         self.cur_timer = self.timer1
         self.cur_table_widget = self.tableWidget
-        self.frame_cnt = 1
+        self.frame_cnt = 2
         # # 导出窗口
         # self.exlist = ExList(*self.get_frames())
 
@@ -328,12 +335,12 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
                 table_widget.item(row, 7).setTextAlignment(int(Qt.AlignHCenter | Qt.AlignVCenter))
 
     def init_legend(self):
+        # 保留Frame1的图例
         for frame in self.get_frames()[1:]:
             for curve in frame.get_curves():
                 self.plt_legend.removeItem(curve.name)
 
     def init_action(self):
-        self.checkBox_freeze_serialdebugger.toggled.connect(self.checkBox_freeze_slot)
         self.checkBox_legend.toggled.connect(self.update_legend_view)
         self.checkBox_viewall.toggled.connect(self.view_all)
         self.pushButton_resume.clicked.connect(self.resume_display)
@@ -350,15 +357,15 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
     def tableWidget_cellChanged(self, row, col):
         if col == 6:
             try:
-                frame = self.get_frames()[self.cur_tab]
-                table_widget = self.get_tableWidgets()[self.cur_tab]
+                frame = self.cur_frame
+                table_widget = self.cur_table_widget
                 frame.get_curves()[row].y_offset = float(table_widget.item(row, col).text())
             except ValueError:
                 pass
         elif col == 7:
             try:
-                frame = self.get_frames()[self.cur_tab]
-                table_widget = self.get_tableWidgets()[self.cur_tab]
+                frame = self.cur_frame
+                table_widget = self.cur_table_widget
                 frame.get_curves()[row].y_scale = float(table_widget.item(row, col).text())
             except ValueError:
                 pass
@@ -372,14 +379,14 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
     def get_tableWidgets(self):
         return [self.tableWidget, self.tableWidget_2]
 
-    def checkBox_freeze_slot(self, cmd):
-        self.freeze_sd_emit(cmd)
+    def freeze_serialdebugger(self, cmd):
+        self.freeze_serialdebugger_emit(cmd)
 
-    def freeze_sd_emit(self, cmd):
+    def freeze_serialdebugger_emit(self, cmd):
         if cmd:
-            print('冻结调试助手界面')
+            print('冻结调试助手接收区界面')
         else:
-            print('解锁调试助手界面')
+            print('解锁调试助手接收区界面')
 
     def update_tab(self, p_int):
         self.update_legend(self.cur_frame, self.get_frames()[p_int])
@@ -387,6 +394,11 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
         self.cur_timer = self.get_timers()[self.cur_tab]
         self.cur_frame = self.get_frames()[self.cur_tab]
         self.cur_table_widget = self.get_tableWidgets()[self.cur_tab]
+        """
+        切换帧的时候这个光标先置为-1(即移动到最新数据点的位置)
+        否则切换帧的时候可能会因为timer数据量不同导致的cur_timer.time[cur_index]索引出界
+        """
+        self.cur_index = -1
         # print("tab: %s %s %s" % (self.cur_tab, self.cur_timer, self.cur_frame))
 
     def update_legend(self, last_frame, now_frame):
@@ -405,28 +417,36 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
             for curve in self.cur_frame.get_curves():
                 self.plt_legend.removeItem(curve.name)
 
-    def update_ui_info(self):
-        self.plt.setLabel(axis='bottom', text='t (s) 当前时间：{:.3f}'.format(self.cur_timer.time[self.cur_index]))
-        self.vline.setPos(self.cur_timer.time[self.cur_index])
-        # frame = self.get_frames()[self.cur_tab]
-        # table_widget = self.get_tableWidgets()[self.cur_tab]
-        for row, curve in enumerate(self.cur_frame.get_curves()):
+    def update_frame_info(self, index):
+        frame = self.get_frames()[index]
+        table_widget = self.get_tableWidgets()[index]
+        for row, curve in enumerate(frame.get_curves()):
             # # 当前时间
             # self.cur_table_widget.item(row, 2).setText(str('%.3f' % self.cur_timer.time[self.cur_index]))
             # 当前数值
-            self.cur_table_widget.item(row, 2).setText(str('%.3f' % curve.dat[self.cur_index]))
+            table_widget.item(row, 2).setText(str('%.3f' % curve.dat[self.cur_index]))
             # 最小值
             if curve.dat_min is not None:
-                self.cur_table_widget.item(row, 3).setText(str('%.3f' % curve.dat_min))
+                table_widget.item(row, 3).setText(str('%.3f' % curve.dat_min))
             else:
-                self.cur_table_widget.item(row, 3).setText(str(curve.dat_min))
+                table_widget.item(row, 3).setText(str(curve.dat_min))
             # 最大值
             if curve.dat_max is not None:
-                self.cur_table_widget.item(row, 4).setText(str('%.3f' % curve.dat_max))
+                table_widget.item(row, 4).setText(str('%.3f' % curve.dat_max))
             else:
-                self.cur_table_widget.item(row, 4).setText(str(curve.dat_max))
+                table_widget.item(row, 4).setText(str(curve.dat_max))
             # 平均值
-            self.cur_table_widget.item(row, 5).setText(str('%.3f' % curve.get_avr()))
+            table_widget.item(row, 5).setText(str('%.3f' % curve.get_avr()))
+
+    def update_ui_info(self):
+        self.plt.setLabel(axis='bottom', text='t (s) 当前时间：{:.3f}'.format(self.cur_timer.time[self.cur_index]))
+        self.vline.setPos(self.cur_timer.time[self.cur_index])
+
+        if self.display_state == self.WFV_DISPLAY_RESUME:
+            self.update_frame_info(self.cur_tab)
+        elif self.display_state == self.WFV_DISPLAY_PAUSE:
+            for i in range(self.frame_cnt):
+                self.update_frame_info(i)
 
     def update_cursor(self, evt):
         pos = self.plt.mapToScene(evt.pos())
@@ -443,12 +463,20 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
                         index = -self.cur_timer.point_num
                     else:
                         index = -int(coef * self.cur_timer.point_num)
+                        # 防止过小导致-0(=0)使得光标跳至开头的位置[0]，保证从后往前数
+                        if index == 0:
+                            index = -1
                     self.cur_index = index
                 elif self.display_state == self.WFV_DISPLAY_PAUSE:
-                    if coef < 0:
+                    if coef <= 0:
                         index = -1
+                    elif coef > 1:
+                        index = -int(coef * self.cur_timer.point_num)
                     else:
                         index = -int(coef * self.cur_timer.point_num)
+                        # 防止过小导致-0(=0)使得光标跳至开头的位置[0]，保证从后往前数
+                        if index == 0:
+                            index = -1
 
                     if abs(index) > self.frame1.cnt:
                         index = -self.frame1.cnt
@@ -457,6 +485,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
                     if abs(index) > self.cur_timer.point_num:
                         self.cur_timer.point_num = -index
                         self.cur_timer.min_time = self.cur_timer.time[index]
+                        # 暂停后往左边移动可以将未显示出来的点随着光标位置显示出来
                         self.frame_plot()
                 self.update_ui_info()
         pg.GraphicsView.mouseMoveEvent(self.plt, evt)
@@ -473,7 +502,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
             qColor = QColorDialog.getColor()
             if qColor.isValid():
                 color = qColor.name()
-                frame = self.get_frames()[self.cur_tab]
+                frame = self.cur_frame
                 if index.row() < frame.param_cnt:
                     frame.get_curves()[index.row()].set_color(color)
 
@@ -487,12 +516,15 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
 
     def resume_display(self):
         if self.display_state == self.WFV_DISPLAY_PAUSE:
+            # 暂停 -> 继续
             self.display_state = self.WFV_DISPLAY_RESUME
             self.pushButton_resume.setText('暂停')
             self.cur_timer.start(self.cur_timer.UPDATE_PERIOD)
         elif self.display_state == self.WFV_DISPLAY_RESUME:
+            # 继续 -> 暂停
             self.display_state = self.WFV_DISPLAY_PAUSE
             self.pushButton_resume.setText('继续')
+            # 全部定时器暂停
             for tmr in self.get_timers():
                 tmr.stop()
             self.frame_plot()   # 更新剩余的点
@@ -501,7 +533,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
 
     def restart_display(self):
         if self.display_state == self.WFV_DISPLAY_START:
-            self.checkBox_freeze_serialdebugger.setChecked(True)
+            self.freeze_serialdebugger(True)
             self.pushButton_restart.setText('重启')
             self.display_state = self.WFV_DISPLAY_RESUME
             for tmr in self.get_timers():
@@ -526,12 +558,14 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
                 self.pushButton_resume.setText('暂停')
 
     def frame_plot(self):
+        # 同时显示多帧
         # now_time = time.perf_counter()
         for i, frame in enumerate(self.get_frames()):
             timer = self.get_timers()[i]
             frame.plot(timer.time[-timer.point_num:], timer.point_num)
-        # print(now_time-time.perf_counter())
+        # print(now_time-time.perf_counter()) 计算耗时
 
+        # 只显示单独的一帧
         # for frame in self.get_frames():
         #     if frame == self.cur_frame:
         #         frame.plot(self.cur_timer.time[-self.cur_timer.point_num:], self.cur_timer.point_num)
@@ -599,6 +633,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
             self.frame2.rx_flag = 0
         # else:
         #     self.timer2.iter_time()
+        #     # 没接收到数据填0
         #     self.frame2.update(None)
 
         # print(self.curve1_show_cnt)
@@ -616,7 +651,7 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
             dat1 = math.sin(self.timer1.time[-1] * math.pi / 32)
         self.frame1.update((dat1, dat2, 0, 0, 0, 0))
         self.timer2.iter_time()
-        self.frame2.update((1, 2, 3, 4))
+        self.frame2.update((1, 2, 3, 4, 5))
         self.frame_plot()
         self.update_xscale_view()
         self.update_ui_info()

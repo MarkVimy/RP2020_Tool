@@ -24,6 +24,9 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         self.exlist = ExList(*self.wfv.get_frames(), *self.wfv.get_timers())
         self.serbtn_last_clicked = 0
         self.wfvbtn_last_clicked = 0
+        self.ser_win_is_pop = False
+        self.wfv_win_is_pop = False
+        self.toolbar_index = [i for i in range(2)]
         self.init_ui()
         self.init_serial_debugger()
         self.init_waveform_viewer()
@@ -67,8 +70,11 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         # 重定义关闭事件
         self.wfv_ui.closeEvent = self.wfv_closeEvent
         # 重定义信号发射函数
-        self.wfv.freeze_sd_emit = self.freeze_sd_emit
+        self.wfv.freeze_serialdebugger_emit = self.freeze_sd_emit
         self.wfv.export_emit = self.export_emit
+
+    def init_user_manual(self):
+        pass
 
     def init_action(self):
         # 串口调试助手
@@ -77,11 +83,16 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         # 示波器
         self.actionWaveformViewer_2.triggered.connect(self.wfv_ui_show)
         self.actionWaveformViewer.triggered.connect(self.wfv_ui_show)
+        # 使用说明
+        self.actionUserManual.triggered.connect(self.user_manual_show)
 
     def init_signal(self):
         self.frame_signal.connect(self.wfv.add_frame)
-        self.freeze_sd_signal.connect(self.ser.freeze)
+        self.freeze_sd_signal.connect(self.ser.freeze_rx_region)
         self.export_signal.connect(self.exlist.show)
+
+    def get_toolbar_index(self):
+        return self.toolbar_index
 
     def frame_emit(self, frame):
         self.frame_signal.emit(frame)
@@ -108,19 +119,23 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         self.ser_ui.setWindowTitle('RP2020 串口调试助手')
         self.ser_ui.setWindowIcon(QIcon('../GUI/RpLogo.jpg'))
         self.ser_ui.show()
+        self.ser_win_is_pop = True
+        index = self.toolbar_index.pop(0)
+        self.toolbar_index.append(index)
 
     def ser_ui_show(self):
         if self.sender() == self.actionSerialDebugger_2:
             self.ser_pop_win()
         elif self.sender() == self.actionSerialDebugger:
-            # TabWidget切换页
-            self.tabWidget.setCurrentIndex(0)
-            # 双击Toolbar按钮则弹窗
-            now_clicked = time.time()
-            if now_clicked - self.serbtn_last_clicked <= 0.5:
-                self.ser_pop_win()
-            else:
-                self.serbtn_last_clicked = now_clicked
+            if not self.ser_win_is_pop:
+                # TabWidget切换页
+                self.tabWidget.setCurrentIndex(self.toolbar_index[0])
+                # 双击Toolbar按钮则弹窗
+                now_clicked = time.time()
+                if now_clicked - self.serbtn_last_clicked <= 0.5:
+                    self.ser_pop_win()
+                else:
+                    self.serbtn_last_clicked = now_clicked
 
     def wfv_pop_win(self):
         # 将控件提升为顶层窗口
@@ -128,19 +143,26 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         self.wfv_ui.setWindowTitle('RP2020 示波器')
         self.wfv_ui.setWindowIcon(QIcon('../GUI/RpLogo.jpg'))
         self.wfv_ui.show()
+        self.wfv_win_is_pop = True
+        index = self.toolbar_index.pop(1)
+        self.toolbar_index.append(index)
 
     def wfv_ui_show(self):
         if self.sender() == self.actionWaveformViewer_2:
             self.wfv_pop_win()
         elif self.sender() == self.actionWaveformViewer:
-            # TabWidget切换页
-            self.tabWidget.setCurrentIndex(1)
-            # 双击Toolbar按钮则弹窗
-            now_clicked = time.time()
-            if now_clicked - self.wfvbtn_last_clicked <= 0.5:
-                self.wfv_pop_win()
-            else:
-                self.wfvbtn_last_clicked = now_clicked
+            if not self.wfv_win_is_pop:
+                # TabWidget切换页
+                self.tabWidget.setCurrentIndex(self.toolbar_index[1])
+                # 双击Toolbar按钮则弹窗
+                now_clicked = time.time()
+                if now_clicked - self.wfvbtn_last_clicked <= 0.5:
+                    self.wfv_pop_win()
+                else:
+                    self.wfvbtn_last_clicked = now_clicked
+
+    def user_manual_show(self):
+        self.tabWidget.setCurrentIndex(2)
 
     def ser_closeEvent(self, event):
         """ 重定义串口调试助手独立窗口的退出事件(退出之前先关闭串口)
@@ -150,6 +172,7 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         # 将窗体内容转移至TabWidget中
         self.tabWidget.insertTab(0, self.ser_ui, '串口调试助手')
         self.tabWidget.setCurrentIndex(0)
+        self.ser_win_is_pop = False
 
     def wfv_closeEvent(self, event):
         """ 重定义示波器独立窗口的退出事件(退出之前先关闭串口)
@@ -159,6 +182,7 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         # 将窗体内容转移至TabWidget中
         self.tabWidget.insertTab(1, self.wfv_ui, '示波器')
         self.tabWidget.setCurrentIndex(1)
+        self.wfv_win_is_pop = False
 
     def closeEvent(self, event):
         """ 主窗口关闭后会关闭所有独立弹窗，以便退出程序

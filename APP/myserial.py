@@ -61,6 +61,7 @@ class SerialDebugger(QWidget, Ui_SerialDebugger):
         self.checkBox_timer_en.toggled.connect(self.port_set_timer)
         self.checkBox_hex_send.toggled.connect(self.port_hex_send)
         self.checkBox_hex_show.toggled.connect(self.port_hex_show)
+        self.checkBox_rx_not_show.toggled.connect(self.freeze_rx_region)
         # 文本输入框
         self.lineEdit_timer.textEdited.connect(self.port_edit_timer_hz)
         # 按钮动作
@@ -376,10 +377,8 @@ class SerialDebugger(QWidget, Ui_SerialDebugger):
         data = data[:frame_len]
         if not isinstance(data, bytes):
             try:
-                # TODO:
                 data = data.encode('utf-8')
             except:
-                # TODO:
                 print('No Bytes')
                 return
         byte_list = [c for c in data]
@@ -423,7 +422,8 @@ class SerialDebugger(QWidget, Ui_SerialDebugger):
                     # self.frame_cnt += 1
                     # print(self.frame_cnt)
                 elif rx_fifo[i+2] == F2_BYTE:
-                    dat = struct.unpack('H', rx_fifo[i+4:i+6]) + struct.unpack('f', rx_fifo[i+6:i+10]) + struct.unpack('H', rx_fifo[i+10:i+12]) + struct.unpack('f', rx_fifo[i+12:i+16])
+                    dat = struct.unpack('B', rx_fifo[i+4:i+5]) + struct.unpack('HHH', rx_fifo[i+5:i+11]) + struct.unpack('f', rx_fifo[i+11:i+15])
+                    # dat = struct.unpack('H', rx_fifo[i+4:i+6]) + struct.unpack('f', rx_fifo[i+6:i+10]) + struct.unpack('H', rx_fifo[i+10:i+12]) + struct.unpack('f', rx_fifo[i+12:i+16])
                     frame = (F2_BYTE, *dat)
                     self.port_frame_emit(frame)
             elif len(rx_fifo[i:end_index]) < 5 + rx_fifo[i+3]:
@@ -464,14 +464,14 @@ class SerialDebugger(QWidget, Ui_SerialDebugger):
     def port_show_rx_rate(self):
         print(self.rx_rate)
 
-    def freeze(self, cmd):
+    def freeze_rx_region(self, cmd):
         if cmd:
             self.plainTextEdit_rx.setEnabled(False)
-            self.plainTextEdit_tx.setEnabled(False)
+            # self.plainTextEdit_tx.setEnabled(False)
             self.isFrozen = True
         else:
             self.plainTextEdit_rx.setEnabled(True)
-            self.plainTextEdit_tx.setEnabled(True)
+            # self.plainTextEdit_tx.setEnabled(True)
             self.isFrozen = False
 
 

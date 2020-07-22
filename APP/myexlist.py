@@ -21,7 +21,6 @@ class ExList(QWidget, Ui_ExList):
             elif isinstance(item, WaveformTimer):
                 self.timers.append(item)
 
-        # TODO:将来这里的2替换成传进来的frame的个数
         for i in range(len(self.frames)):
             listview_left, listview_right = self.get_listviews()[2*i:2*(i+1)]
             # 新建左列并设置数据

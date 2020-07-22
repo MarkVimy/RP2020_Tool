@@ -317,6 +317,13 @@
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
+            <item row="2" column="0">
+             <widget class="QPushButton" name="pushButton_rx_clear">
+              <property name="text">
+               <string>清空接收区</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QCheckBox" name="checkBox_hex_show">
               <property name="text">
@@ -331,9 +338,9 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QPushButton" name="pushButton_rx_clear">
+             <widget class="QCheckBox" name="checkBox_rx_not_show">
               <property name="text">
-               <string>清空接收区</string>
+               <string>关闭显示</string>
               </property>
              </widget>
             </item>
