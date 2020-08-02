@@ -157,12 +157,12 @@ class Frame1(Frame):
         self.pitch_rate = Curve(plot_widget, color='#ff00ff', name='pitch_rate')
         self.roll_rate = Curve(plot_widget, color='#00ffff', name='roll_rate')
 
-        self.yaw.name_box.setChecked(False)
-        self.pitch.name_box.setChecked(False)
-        self.roll.name_box.setChecked(False)
-        self.yaw_rate.name_box.setChecked(False)
-        self.pitch_rate.name_box.setChecked(False)
-        self.roll_rate.name_box.setChecked(False)
+        # self.yaw.name_box.setChecked(False)
+        # self.pitch.name_box.setChecked(False)
+        # self.roll.name_box.setChecked(False)
+        # self.yaw_rate.name_box.setChecked(False)
+        # self.pitch_rate.name_box.setChecked(False)
+        # self.roll_rate.name_box.setChecked(False)
 
         self.param_cnt = 6
         # self.param_cnt = 3
@@ -197,7 +197,7 @@ class Frame2(Frame):
 
 class WaveformTimer(QTimer):
     # 示波器显示间隔
-    UPDATE_PERIOD = 100  # 20~30ms较为合适
+    UPDATE_PERIOD = 200  # 20~30ms较为合适
 
     def __init__(self, ot_evt):
         super(WaveformTimer, self).__init__()
@@ -249,7 +249,6 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
 
     def __init__(self, widget):
         super(WaveformViewer, self).__init__()
-        # self.timer = WaveformTimer(self.update_plot)
         self.init_ui(widget)
         self.init_params()
         self.init_tableWidget()
@@ -274,8 +273,6 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
         self.cur_timer = self.timer1
         self.cur_table_widget = self.tableWidget
         self.frame_cnt = 2
-        # # 导出窗口
-        # self.exlist = ExList(*self.get_frames())
 
     def init_ui(self, widget):
         self.setupUi(widget)
@@ -424,7 +421,12 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
             # # 当前时间
             # self.cur_table_widget.item(row, 2).setText(str('%.3f' % self.cur_timer.time[self.cur_index]))
             # 当前数值
-            table_widget.item(row, 2).setText(str('%.3f' % curve.dat[self.cur_index]))
+            try:
+                table_widget.item(row, 2).setText(str('%.3f' % curve.dat[self.cur_index]))
+            except IndexError:
+                # 由多帧数据不同步发送引起的self.cur_index超出索引边界
+                table_widget.item(row, 2).setText(str('%.3f' % curve.dat[-1]))
+
             # 最小值
             if curve.dat_min is not None:
                 table_widget.item(row, 3).setText(str('%.3f' % curve.dat_min))
@@ -582,23 +584,57 @@ class WaveformViewer(QGraphicsView, Ui_WaveformViewer):
         self.update_xscale_view()
 
     def update_xscale_view(self):
-        for i, frame in enumerate(self.get_frames()):
-            timer = self.get_timers()[i]
+        # timer = self.cur_timer
+        # frame = self.cur_frame
+        # if not self.checkBox_viewall.isChecked():
+        #     if frame.cnt > self.xscale:
+        #         # 数据点足够多，可以显示局部数据
+        #         self.plt.setXRange(timer.time[-self.xscale], timer.max_time)
+        #         timer.point_num = self.xscale
+        #         timer.min_time = timer.time[-self.xscale]
+        #     else:
+        #         # 数据点不够多，显示全部数据
+        #         self.plt.setXRange(timer.time[0], timer.max_time)
+        #         timer.point_num = frame.cnt
+        #         timer.min_time = timer.time[0]
+        # else:
+        #     self.plt.enableAutoRange('xy', True)
+        #     timer.point_num = frame.cnt
+        #     timer.min_time = timer.time[0]
+
+            # 初始化的时候以第一帧的点数作为起始值
+            x_point_num = 0
+            x_timer = self.get_timers()[0]
+
             if not self.checkBox_viewall.isChecked():
-                if frame.cnt > self.xscale:
-                    # 数据点足够多，可以显示局部数据
-                    self.plt.setXRange(timer.time[-self.xscale], timer.max_time)
-                    timer.point_num = self.xscale
-                    timer.min_time = timer.time[-self.xscale]
+                for i, frame in enumerate(self.get_frames()):
+                    timer = self.get_timers()[i]
+                    if frame.cnt > self.xscale:
+                        # 数据点足够多，可以显示局部数据
+                        timer.point_num = self.xscale
+                        timer.min_time = timer.time[-self.xscale]
+                    else:
+                        # 数据点不够多，显示全部数据
+                        timer.point_num = frame.cnt
+                        timer.min_time = timer.time[0]
+
+                    if x_point_num < timer.point_num:
+                        x_point_num = timer.point_num
+                        x_timer = timer
+
+                # 数据点不够多，显示全部数据，从[0]开始
+                if x_point_num < self.xscale:
+                    x_point_num = 0
                 else:
-                    # 数据点不够多，显示全部数据
-                    self.plt.setXRange(timer.time[0], timer.max_time)
-                    timer.point_num = frame.cnt
-                    timer.min_time = timer.time[0]
+                    x_point_num = self.xscale
+                # 选择数据点最多的显示
+                self.plt.setXRange(x_timer.time[-x_point_num], x_timer.max_time)
             else:
                 self.plt.enableAutoRange('xy', True)
-                timer.point_num = frame.cnt
-                timer.min_time = timer.time[0]
+                for i, frame in enumerate(self.get_frames()):
+                    timer = self.get_timers()[i]
+                    timer.point_num = frame.cnt
+                    timer.min_time = timer.time[0]
 
     def add_frame(self, frame):
         if self.display_state == self.WFV_DISPLAY_RESUME:

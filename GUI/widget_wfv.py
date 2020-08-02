@@ -161,7 +161,7 @@ class Ui_WaveformViewer(object):
         self.gridLayout.setRowStretch(0, 4)
 
         self.retranslateUi(WaveformViewer)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(WaveformViewer)
 
     def retranslateUi(self, WaveformViewer):

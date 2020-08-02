@@ -41,7 +41,7 @@ class MyConsole(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle('RP2020 上位机')
         self.setWindowIcon(QIcon('../GUI/RpLogo.jpg'))
-        self.labelRp = QLabel('@Robopilots2020')
+        self.labelRp = QLabel('@Robotpilots2020')
         self.labelTxCnt = QLabel('发送：0')
         self.labelRxCnt = QLabel('接收：0')
         self.labelRxRate = QLabel('速率：0')
