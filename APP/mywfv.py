@@ -150,6 +150,13 @@ class Frame1(Frame):
         super(Frame1, self).__init__()
         self.func_byte = Fn_BYTES[0]
 
+        # self.yaw = Curve(plot_widget, color='r', name='real_vol')
+        # self.pitch = Curve(plot_widget, color='g', name='real_power')
+        # self.roll = Curve(plot_widget, color='b', name='pid_out')
+        # self.yaw_rate = Curve(plot_widget, color='#ffff00', name='target_power')
+        # self.pitch_rate = Curve(plot_widget, color='#ff00ff', name='power_buff')
+        # self.roll_rate = Curve(plot_widget, color='#00ffff', name='discharge_flag')
+
         self.yaw = Curve(plot_widget, color='r', name='yaw')
         self.pitch = Curve(plot_widget, color='g', name='pitch')
         self.roll = Curve(plot_widget, color='b', name='roll')

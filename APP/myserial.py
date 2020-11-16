@@ -416,7 +416,7 @@ class SerialDebugger(QWidget, Ui_SerialDebugger):
                 # print(rx_fifo[2:3] + rx_fifo[4:-1])
                 # 发送tuple(Fx_Byte, [byte1, [...,]])
                 if rx_fifo[i+2] == F1_BYTE:
-                    dat = struct.unpack('fffhhh', rx_fifo[i+4:i+22])
+                    dat = struct.unpack('ffffff', rx_fifo[i+4:i+28])
                     frame = (F1_BYTE, *dat)
                     self.port_frame_emit(frame)
                     # self.frame_cnt += 1
